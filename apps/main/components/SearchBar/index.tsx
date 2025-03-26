@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Input } from "@ui/components/input";
+import { Input } from "@ui/components/ui/input";
 
 export default function SearchBar({ query, setQuery, onSubmit }: any) {
   return (
