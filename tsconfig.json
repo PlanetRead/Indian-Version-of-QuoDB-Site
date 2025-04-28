@@ -1,3 +1,9 @@
 {
-  "extends": "@repo/typescript-config/base.json"
+  "extends": "./node_modules/@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@ui/*": ["packages/ui/*"]
+    }
+  }
 }
