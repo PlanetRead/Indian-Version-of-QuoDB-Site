@@ -1,40 +1,43 @@
 "use client"
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useRef } from 'react';
 import { translate } from '../../libs/utils';
+'lucide-react'
+import { Loader2 } from 'lucide-react'; // optional loading icon from lucide-react or any spinner you like
 
-const languages = ['Detect Language', 'English', 'Hindi', 'Tamil', 'Telegu'];
-const slug = { 'Detect Language': 'auto', 'English': 'en', 'Hindi': 'hi', 'Tamil': 'ta', 'Telegu': 'te' }
+const languages = ['Detect Language', 'English', 'Hindi', 'Tamil', 'Telugu'];
+const slug = { 'Detect Language': 'auto', 'English': 'en', 'Hindi': 'hi', 'Tamil': 'ta', 'Telugu': 'te' };
 
 const TranslateClient = () => {
     const [sourceText, setSourceText] = useState('');
     const [target, setTarget] = useState('English');
     const [source, setSource] = useState('Detect Language');
     const [translatedText, setTranslatedText] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const inputRef = useRef<HTMLTextAreaElement>(null);
 
     const handleTranslate = async () => {
-        setTranslatedText('Translating...');
+        if (!sourceText.trim()) return;
+        setIsLoading(true);
+        setTranslatedText('');
         try {
             const targetSlug = slug[target as keyof typeof slug];
             const sourceSlug = slug[source as keyof typeof slug];
-            const data = {
-                "sentence": sourceText,
-                "source": sourceSlug,
-                "target": targetSlug
-            }
-
+            const data = { sentence: sourceText, source: sourceSlug, target: targetSlug };
             const response: any = await translate(data);
             setTranslatedText(response);
         } catch (error) {
-            console.log(error);
+            console.error(error);
             setTranslatedText('Translation failed. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
-
     };
 
     const handleClear = () => {
         setSourceText('');
         setTranslatedText('');
+        inputRef.current?.focus();
     };
 
     const selectLanguage = (lang: string) => {
@@ -46,70 +49,79 @@ const TranslateClient = () => {
     };
 
     return (
-        <div className="relative bg-white w-full">
-            <div className="flex flex-col">
-                <div className="container mx-auto px-0 lg:px-24">
-                    <div className="flex flex-row justify-between my-4">
-                        <div>
-                            {languages.map(lang => (
-                                <button
-                                    key={lang}
-                                    className={`uppercase py-3.5 px-3 font-semibold text-xs lg:text-sm ${source === lang ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:text-gray-700'} transition-colors duration-100`}
-                                    onClick={() => selectLanguage(lang)}
-                                >
-                                    {lang}
-                                </button>
-                            ))}
-                        </div>
-                        <div>
-                            {languages.filter(lang => lang !== 'Detect Language').map(lang => (
-                                <button
-                                    key={lang}
-                                    className={`uppercase py-3.5 px-3 font-semibold text-xs lg:text-sm ${target === lang ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:text-gray-700'} transition-colors duration-100`}
-                                    onClick={() => selectTargetLanguage(lang)}
-                                >
-                                    {lang}
-                                </button>
-                            ))}
-                        </div>
+        <div className="min-h-screen bg-gradient-to-br from-sky-100 via-indigo-100 to-white flex items-center justify-center p-6">
+            <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl p-8 md:p-12 space-y-10 transition-all duration-500">
+                
+                {/* Language selectors */}
+                <div className="flex flex-col md:flex-row justify-between gap-6">
+                    <div className="flex flex-wrap gap-2">
+                        {languages.map(lang => (
+                            <button
+                                key={lang}
+                                className={`py-2 px-4 rounded-full text-sm font-semibold transition-all duration-300 ${source === lang ? 'bg-blue-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-blue-100'}`}
+                                onClick={() => selectLanguage(lang)}
+                            >
+                                {lang}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {languages.filter(lang => lang !== 'Detect Language').map(lang => (
+                            <button
+                                key={lang}
+                                className={`py-2 px-4 rounded-full text-sm font-semibold transition-all duration-300 ${target === lang ? 'bg-indigo-600 text-white shadow' : 'bg-gray-100 text-gray-700 hover:bg-indigo-100'}`}
+                                onClick={() => selectTargetLanguage(lang)}
+                            >
+                                {lang}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Textareas */}
+                <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex-1 relative group">
+                        <textarea
+                            ref={inputRef}
+                            className="w-full h-44 p-4 bg-gray-50 rounded-2xl shadow-inner outline-none text-lg resize-none focus:ring-2 focus:ring-blue-400 transition-all custom-scrollbar"
+                            placeholder="Enter your text..."
+                            spellCheck="false"
+                            value={sourceText}
+                            onChange={(e) => setSourceText(e.target.value)}
+                        />
+                        {sourceText.length > 0 && (
+                            <button
+                                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-all"
+                                onClick={handleClear}
+                                title="Clear"
+                            >
+                                ✕
+                            </button>
+                        )}
                     </div>
 
-                    <div className="flex">
-                        <div className="w-6/12 bg-gray-100 p-2">
-                            <textarea
-                                className="resize-none w-full h-40 focus:outline-none text-base lg:text-2xl text-black custom-scrollbar"
-                                spellCheck="false"
-                                value={sourceText}
-                                onChange={(e) => setSourceText(e.target.value)}
-                            ></textarea>
-                            <div className='h-10'>
-
-                                {sourceText.length > 0 && (
-                                    <button
-                                        className="hover:bg-gray-100 rounded-full w-10 h-10 mt-1 transition-colors duration-100"
-                                        title="Clear"
-                                        onClick={handleClear}
-                                    >
-                                        Clear
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                        <div className="w-6/12 bg-gray-100 rounded-br-lg p-4">
-                            <textarea
-                                className="resize-none w-full bg-gray-100 h-40 focus:outline-none text-base lg:text-2xl text-black custom-scrollbar"
-                                spellCheck="false"
-                                readOnly
-                                value={translatedText}
-                            ></textarea>
+                    <div className="flex-1 relative">
+                        <div className="w-full h-44 p-4 bg-gray-50 rounded-2xl shadow-inner text-lg custom-scrollbar overflow-y-auto">
+                            {isLoading ? (
+                                <div className="flex items-center justify-center h-full animate-pulse text-blue-400">
+                                    <Loader2 className="h-8 w-8 animate-spin" />
+                                </div>
+                            ) : (
+                                <p className="whitespace-pre-line">{translatedText}</p>
+                            )}
                         </div>
                     </div>
+                </div>
 
-                    <div className="flex w-full items-center justify-center my-4">
-                        <button className="rounded px-3 py-1 bg-blue-100 border border-blue-200 text-base text-blue-700 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-600" onClick={handleTranslate}>
-                            Translate Text
-                        </button>
-                    </div>
+                {/* Translate Button */}
+                <div className="flex justify-center">
+                    <button
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-3 px-8 rounded-full text-lg font-semibold shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50"
+                        onClick={handleTranslate}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Translating...' : 'Translate Text'}
+                    </button>
                 </div>
             </div>
         </div>
