@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { translate } from '../../libs/utils';
 
-const languages = ['Detect Language', 'English', 'Hindi', 'Tamil', 'Telegu'];
-const slug = { 'Detect Language': 'auto', 'English': 'en', 'Hindi': 'hi', 'Tamil': 'ta', 'Telegu': 'te' }
+const languages = ['Detect Language', 'English', 'Hindi', 'Tamil', 'Telugu'];
+const slug = { 'Detect Language': 'auto', 'English': 'en', 'Hindi': 'hi', 'Tamil': 'ta', 'Telugu': 'te' }
 
 const TranslateClient = () => {
     const [sourceText, setSourceText] = useState('');
