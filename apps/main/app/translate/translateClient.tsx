@@ -1,26 +1,28 @@
 "use client"
 import React, { useState } from 'react';
-import axios from 'axios';
 import { translate } from '../../libs/utils';
 
-const languages = ['Detect Language', 'English', 'Hindi', 'Tamil', 'Telegu'];
-const slug = { 'Detect Language': 'auto', 'English': 'en', 'Hindi': 'hi', 'Tamil': 'ta', 'Telegu': 'te' }
+const languages = [
+    { label: 'Detect Language', code: 'auto', sourceOnly: true },
+    { label: 'English', code: 'en' },
+    { label: 'Hindi', code: 'hi' },
+    { label: 'Tamil', code: 'ta' },
+    { label: 'Telugu', code: 'te' }
+];
 
 const TranslateClient = () => {
     const [sourceText, setSourceText] = useState('');
-    const [target, setTarget] = useState('English');
-    const [source, setSource] = useState('Detect Language');
+    const [target, setTarget] = useState('en');
+    const [source, setSource] = useState('auto');
     const [translatedText, setTranslatedText] = useState('');
 
     const handleTranslate = async () => {
         setTranslatedText('Translating...');
         try {
-            const targetSlug = slug[target as keyof typeof slug];
-            const sourceSlug = slug[source as keyof typeof slug];
             const data = {
                 "sentence": sourceText,
-                "source": sourceSlug,
-                "target": targetSlug
+                "source": source,
+                "target": target
             }
 
             const response: any = await translate(data);
@@ -37,12 +39,12 @@ const TranslateClient = () => {
         setTranslatedText('');
     };
 
-    const selectLanguage = (lang: string) => {
-        setSource(lang);
+    const selectLanguage = (code: string) => {
+        setSource(code);
     };
 
-    const selectTargetLanguage = (lang: string) => {
-        setTarget(lang);
+    const selectTargetLanguage = (code: string) => {
+        setTarget(code);
     };
 
     return (
@@ -53,22 +55,22 @@ const TranslateClient = () => {
                         <div>
                             {languages.map(lang => (
                                 <button
-                                    key={lang}
-                                    className={`uppercase py-3.5 px-3 font-semibold text-xs lg:text-sm ${source === lang ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:text-gray-700'} transition-colors duration-100`}
-                                    onClick={() => selectLanguage(lang)}
+                                    key={lang.code}
+                                    className={`uppercase py-3.5 px-3 font-semibold text-xs lg:text-sm ${source === lang.code ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:text-gray-700'} transition-colors duration-100`}
+                                    onClick={() => selectLanguage(lang.code)}
                                 >
-                                    {lang}
+                                    {lang.label}
                                 </button>
                             ))}
                         </div>
                         <div>
-                            {languages.filter(lang => lang !== 'Detect Language').map(lang => (
+                            {languages.filter(lang => !lang.sourceOnly).map(lang => (
                                 <button
-                                    key={lang}
-                                    className={`uppercase py-3.5 px-3 font-semibold text-xs lg:text-sm ${target === lang ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:text-gray-700'} transition-colors duration-100`}
-                                    onClick={() => selectTargetLanguage(lang)}
+                                    key={lang.code}
+                                    className={`uppercase py-3.5 px-3 font-semibold text-xs lg:text-sm ${target === lang.code ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-600 hover:text-gray-700'} transition-colors duration-100`}
+                                    onClick={() => selectTargetLanguage(lang.code)}
                                 >
-                                    {lang}
+                                    {lang.label}
                                 </button>
                             ))}
                         </div>
